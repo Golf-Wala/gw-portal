@@ -8,12 +8,13 @@ import {
 	deleteClub,
 } from "./club.api";
 
-export const useGetClubs = (params?: Record<string, unknown>) => {
-	return useQuery<Club[]>({
-		queryKey: ["clubs", params],
-		queryFn: () => getClubs(params),
+export function useGetClubs(page: number, limit: number = 10) {
+	return useQuery({
+		queryKey: ["clubs", page, limit],
+		queryFn: () => getClubs(page, limit),
+		placeholderData: (prev) => prev,
 	});
-};
+}
 
 export const useGetClubById = (id: string) => {
 	return useQuery<Club>({

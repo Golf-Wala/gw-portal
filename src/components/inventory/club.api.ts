@@ -1,9 +1,22 @@
 import { api } from "@/lib/api";
 import type { Club } from "@/types";
 
-export const getClubs = async (params?: Record<string, unknown>) => {
-	const { data } = await api.get<Club[]>("/clubs", {
-		params,
+type GetClubsResponse = {
+	data: Club[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+	};
+};
+export const getClubs = async (
+	page: number,
+	limit = 10,
+	params?: Record<string, unknown>
+) => {
+	const { data } = await api.get<GetClubsResponse>("/clubs", {
+		params: { page, limit, ...params },
 	});
 	return data;
 };

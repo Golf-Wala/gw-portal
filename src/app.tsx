@@ -6,6 +6,7 @@ import LoginPage from "./components/auth/login-page";
 import Authenticated from "./components/auth/authenticated";
 import ProtectedRoute from "./components/auth/protected-route";
 import InventoryPage from "./components/inventory/inventory-page";
+import DashboardPage from "./components/dashboard";
 
 export default function App() {
 	const isInitializing = useInitialAuth();
@@ -29,7 +30,7 @@ export default function App() {
 				}
 			>
 				<Route element={<Layout />}>
-					<Route index element={<>Dashboard</>} />
+					<Route index element={<DashboardPage />} />
 					<Route path="inventory" element={<InventoryPage />} />
 				</Route>
 			</Route>

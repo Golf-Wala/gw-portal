@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { Club } from "@/types";
+import type { Club, ClubAnalyticsResponse } from "@/types";
 
 type GetClubsResponse = {
 	data: Club[];
@@ -12,7 +12,7 @@ type GetClubsResponse = {
 };
 export const getClubs = async (
 	page: number,
-	limit = 10,
+	limit = 20,
 	params?: Record<string, unknown>
 ) => {
 	const { data } = await api.get<GetClubsResponse>("/clubs", {
@@ -23,6 +23,11 @@ export const getClubs = async (
 
 export const getClubById = async (id: string) => {
 	const { data } = await api.get<Club>(`/clubs/${id}`);
+	return data;
+};
+
+export const getClubAnalytics = async () => {
+	const { data } = await api.get<ClubAnalyticsResponse>("/clubs/analytics");
 	return data;
 };
 

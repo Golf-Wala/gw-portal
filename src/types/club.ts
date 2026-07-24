@@ -140,3 +140,54 @@ export const EMPTY_CLUB: Club = {
 	createdAt: "",
 	updatedAt: "",
 };
+
+export interface ClubAnalyticsResponse {
+	overview: {
+		totalClubs: number;
+		availableCount: number;
+		soldCount: number;
+		inventoryValue: number;
+		totalCost: number;
+		totalRevenue: number;
+		totalProfit: number;
+		sellThroughRate: number;
+		avgDaysToSell: number | null;
+	};
+	byCategory: {
+		_id: string;
+		count: number;
+		available: number;
+		sold: number;
+		inventoryValue: number;
+	}[];
+	byCondition: {
+		_id: string;
+		count: number;
+	}[];
+	byAcquisition: {
+		_id: string;
+		count: number;
+		totalCost: number;
+	}[];
+	topBrands: {
+		_id: string;
+		count: number;
+		inventoryValue: number;
+	}[];
+	monthlyTrend: {
+		month: string; // "YYYY-MM"
+		acquired: number;
+		sold: number;
+		revenue: number;
+		profit: number;
+	}[];
+	recentSales: {
+		_id: string;
+		clubBrand: string;
+		clubModel: string;
+		category: string;
+		purchasePrice: number;
+		soldPrice: number;
+		dateSold: string; // ISO date string over the wire
+	}[];
+}

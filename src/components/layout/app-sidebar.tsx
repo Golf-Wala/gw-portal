@@ -2,6 +2,7 @@ import {
 	ChevronsUpDown,
 	LayoutDashboard,
 	LogOut,
+	ReceiptText,
 	ShelvingUnit,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -34,6 +35,11 @@ const PAGES = [
 		name: "Inventory",
 		location: "/inventory",
 		icon: ShelvingUnit,
+	},
+	{
+		name: "Work Orders",
+		location: "/work-orders",
+		icon: ReceiptText,
 	},
 ];
 

@@ -6,12 +6,17 @@ import {
 	createClub,
 	updateClub,
 	deleteClub,
+	getClubAnalytics,
 } from "./club.api";
 
-export function useGetClubs(page: number, limit: number = 10) {
+export function useGetClubs(
+	page: number,
+	limit = 30,
+	params?: Record<string, unknown>
+) {
 	return useQuery({
 		queryKey: ["clubs", page, limit],
-		queryFn: () => getClubs(page, limit),
+		queryFn: () => getClubs(page, limit, params),
 		placeholderData: (prev) => prev,
 	});
 }
@@ -22,6 +27,13 @@ export const useGetClubById = (id: string) => {
 		queryFn: () => getClubById(id),
 	});
 };
+
+export function useGetClubAnalytics() {
+	return useQuery({
+		queryKey: ["analytics"],
+		queryFn: () => getClubAnalytics(),
+	});
+}
 
 export const useCreateClub = () => {
 	const queryClient = useQueryClient();

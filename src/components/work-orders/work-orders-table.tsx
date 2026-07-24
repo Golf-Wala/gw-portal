@@ -1,69 +1,84 @@
-import { Edit, EllipsisVertical, Trash2 } from "lucide-react";
+import { EllipsisVertical, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "../ui/alert-dialog";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import { Badge } from "../ui/badge";
 import {
 	Table,
-	TableBody,
-	TableCell,
-	TableHead,
 	TableHeader,
 	TableRow,
+	TableHead,
+	TableBody,
+	TableCell,
 } from "../ui/table";
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import {
 	Pagination,
 	PaginationContent,
-	PaginationEllipsis,
 	PaginationItem,
-	PaginationLink,
-	PaginationNext,
 	PaginationPrevious,
+	PaginationNext,
+	PaginationLink,
+	PaginationEllipsis,
 } from "../ui/pagination";
-import { useGetClubs } from "./club.query";
-import { useDeleteClub } from "./club.query";
+import {
+	AlertDialog,
+	AlertDialogContent,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogCancel,
+	AlertDialogAction,
+} from "../ui/alert-dialog";
 import { formatCurrency } from "@/lib/utils";
-import { CLUB_CATEGORIES, CLUB_ACQUISITION } from "@/types/club";
-import { useClubStore } from "./club.store";
-import type { Club } from "@/types/club";
+import { DUMMY_WORK_ORDERS } from "./dummy-data";
+import {
+	WORK_ORDER_TYPES,
+	WORK_ORDER_STATUS,
+	type WorkOrder,
+	type WorkOrderStatus,
+} from "@/types";
 
-export default function ClubsTable() {
-	const setClub = useClubStore((s) => s.setClub);
+const PAGE_SIZE = 10;
+
+const STATUS_BADGE_VARIANT: Record<
+	WorkOrderStatus,
+	"default" | "secondary" | "destructive" | "outline"
+> = {
+	pending: "outline",
+	in_progress: "secondary",
+	completed: "default",
+	cancelled: "destructive",
+};
+
+function formatDate(iso: string) {
+	return new Date(iso).toLocaleDateString("en-US", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
+
+export default function WorkOrdersTable() {
+	const [orders, setOrders] = useState<WorkOrder[]>(DUMMY_WORK_ORDERS);
 	const [page, setPage] = useState(1);
+	const [orderToDelete, setOrderToDelete] = useState<WorkOrder | null>(null);
 
-	const { data, isPending, isPlaceholderData } = useGetClubs(page, 10);
-	const { mutate: deleteClub, isPending: isDeleting } = useDeleteClub();
-
-	const [clubToDelete, setClubToDelete] = useState<Club | null>(null);
-
-	if (isPending) return <p>Loading...</p>;
-
-	const clubs = data?.data ?? [];
-	const totalPages = data?.pagination.totalPages ?? 1;
+	const totalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE));
+	const paginatedOrders = orders.slice(
+		(page - 1) * PAGE_SIZE,
+		page * PAGE_SIZE
+	);
 
 	const handleConfirmDelete = () => {
-		if (!clubToDelete) return;
-
-		deleteClub(clubToDelete._id, {
-			onSuccess: () => {
-				setClubToDelete(null);
-			},
-		});
+		if (!orderToDelete) return;
+		setOrders((prev) => prev.filter((o) => o._id !== orderToDelete._id));
+		setOrderToDelete(null);
 	};
 
 	const goToPage = (p: number) => {
@@ -90,38 +105,36 @@ export default function ClubsTable() {
 			<Table>
 				<TableHeader>
 					<TableRow className="bg-muted">
-						<TableHead>Category</TableHead>
-						<TableHead>Brand</TableHead>
-						<TableHead>Model</TableHead>
-						<TableHead>Acquisition</TableHead>
-						<TableHead>Purchase Price</TableHead>
+						<TableHead>Order #</TableHead>
+						<TableHead>Type</TableHead>
+						<TableHead>Club</TableHead>
+						<TableHead>Customer</TableHead>
+						<TableHead>Date</TableHead>
+						<TableHead>Price</TableHead>
 						<TableHead>Status</TableHead>
 						<TableHead className="text-right"></TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{clubs.map((club) => (
-						<TableRow key={club._id}>
-							<TableCell>
-								{CLUB_CATEGORIES[club.category] ?? ""}
-							</TableCell>
-							<TableCell>{club.clubBrand}</TableCell>
-							<TableCell>{club.clubModel}</TableCell>
-							<TableCell>
-								{CLUB_ACQUISITION[club.acquisition] ?? ""}
+					{paginatedOrders.map((order) => (
+						<TableRow key={order._id}>
+							<TableCell className="font-medium">
+								{order.orderNumber}
 							</TableCell>
 							<TableCell>
-								{formatCurrency(club.purchasePrice)}
+								{WORK_ORDER_TYPES[order.type] ?? ""}
 							</TableCell>
+							<TableCell>
+								{order.clubBrand} {order.clubModel}
+							</TableCell>
+							<TableCell>{order.customerName}</TableCell>
+							<TableCell>{formatDate(order.createdAt)}</TableCell>
+							<TableCell>{formatCurrency(order.price)}</TableCell>
 							<TableCell className="capitalize">
 								<Badge
-									variant={
-										club.status === "available"
-											? "default"
-											: "secondary"
-									}
+									variant={STATUS_BADGE_VARIANT[order.status]}
 								>
-									{club.status}
+									{WORK_ORDER_STATUS[order.status]}
 								</Badge>
 							</TableCell>
 							<TableCell className="text-right">
@@ -135,16 +148,10 @@ export default function ClubsTable() {
 									/>
 									<DropdownMenuContent>
 										<DropdownMenuItem
-											onClick={() => setClub(club)}
-										>
-											<Edit />
-											Edit
-										</DropdownMenuItem>
-										<DropdownMenuItem
 											variant="destructive"
 											onClick={(e) => {
 												e.preventDefault();
-												setClubToDelete(club);
+												setOrderToDelete(order);
 											}}
 										>
 											<Trash2 />
@@ -155,10 +162,10 @@ export default function ClubsTable() {
 							</TableCell>
 						</TableRow>
 					))}
-					{clubs.length === 0 && (
+					{paginatedOrders.length === 0 && (
 						<TableRow>
-							<TableCell colSpan={7} className="text-center">
-								No clubs found.
+							<TableCell colSpan={8} className="text-center">
+								No work orders found.
 							</TableCell>
 						</TableRow>
 					)}
@@ -174,9 +181,7 @@ export default function ClubsTable() {
 									href="#"
 									onClick={(e) => {
 										e.preventDefault();
-										if (!isPlaceholderData) {
-											goToPage(page - 1);
-										}
+										goToPage(page - 1);
 									}}
 									className={
 										page === 1
@@ -200,9 +205,7 @@ export default function ClubsTable() {
 											isActive={p === page}
 											onClick={(e) => {
 												e.preventDefault();
-												if (!isPlaceholderData) {
-													goToPage(p);
-												}
+												goToPage(p);
 											}}
 										>
 											{p}
@@ -216,9 +219,7 @@ export default function ClubsTable() {
 									href="#"
 									onClick={(e) => {
 										e.preventDefault();
-										if (!isPlaceholderData) {
-											goToPage(page + 1);
-										}
+										goToPage(page + 1);
 									}}
 									className={
 										page === totalPages
@@ -233,30 +234,24 @@ export default function ClubsTable() {
 			)}
 
 			<AlertDialog
-				open={!!clubToDelete}
-				onOpenChange={(open) => !open && setClubToDelete(null)}
+				open={!!orderToDelete}
+				onOpenChange={(open) => !open && setOrderToDelete(null)}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							Delete {clubToDelete?.clubBrand}{" "}
-							{clubToDelete?.clubModel}?
+							Delete work order {orderToDelete?.orderNumber}?
 						</AlertDialogTitle>
 						<AlertDialogDescription>
 							This action cannot be undone. This will permanently
-							delete this club and remove its data from the
+							delete this work order and remove its data from the
 							server.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={isDeleting}>
-							Cancel
-						</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={handleConfirmDelete}
-							disabled={isDeleting}
-						>
-							{isDeleting ? "Deleting..." : "Delete"}
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={handleConfirmDelete}>
+							Delete
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

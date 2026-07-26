@@ -1,11 +1,12 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import TradesRoot from "./components/trade";
 import Layout from "./components/layout";
 import useInitialAuth from "./components/auth/use-initial-auth";
 import LogoutPage from "./components/auth/logout-page";
 import LoginPage from "./components/auth/login-page";
 import Authenticated from "./components/auth/authenticated";
 import ProtectedRoute from "./components/auth/protected-route";
-import InventoryPage from "./components/inventory/inventory-page";
+import InventoryPage from "./components/inventory";
 import DashboardPage from "./components/dashboard";
 import WorkOrdersPage from "./components/work-orders";
 
@@ -34,6 +35,7 @@ export default function App() {
 					<Route index element={<DashboardPage />} />
 					<Route path="inventory" element={<InventoryPage />} />
 					<Route path="work-orders" element={<WorkOrdersPage />} />
+					<Route path="trades/*" element={<TradesRoot />} />
 				</Route>
 			</Route>
 

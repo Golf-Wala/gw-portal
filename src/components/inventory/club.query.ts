@@ -35,7 +35,7 @@ export function useGetClubAnalytics() {
 	});
 }
 
-export const useCreateClub = () => {
+export function useCreateClub() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (club: Partial<Club>) => createClub(club),
@@ -43,9 +43,9 @@ export const useCreateClub = () => {
 			queryClient.invalidateQueries({ queryKey: ["clubs"] });
 		},
 	});
-};
+}
 
-export const useUpdateClub = () => {
+export function useUpdateClub() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (club: Partial<Club>) => updateClub(club),
@@ -53,9 +53,9 @@ export const useUpdateClub = () => {
 			queryClient.invalidateQueries({ queryKey: ["clubs"] });
 		},
 	});
-};
+}
 
-export const useDeleteClub = () => {
+export function useDeleteClub() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (id: string) => deleteClub(id),
@@ -63,4 +63,4 @@ export const useDeleteClub = () => {
 			queryClient.invalidateQueries({ queryKey: ["clubs"] });
 		},
 	});
-};
+}

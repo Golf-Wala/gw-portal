@@ -4,6 +4,7 @@ import {
 	LogOut,
 	ReceiptText,
 	ShelvingUnit,
+	ArrowLeftRight,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -40,6 +41,11 @@ const PAGES = [
 		name: "Work Orders",
 		location: "/work-orders",
 		icon: ReceiptText,
+	},
+	{
+		name: "Trades",
+		location: "/trades",
+		icon: ArrowLeftRight,
 	},
 ];
 

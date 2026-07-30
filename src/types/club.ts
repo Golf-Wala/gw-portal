@@ -35,10 +35,10 @@ export interface Club {
 	grind?: string;
 	headcoverIncluded?: boolean;
 
-	acquisition: "cash" | "trade" | "cash_trade";
 	purchasePrice: number;
+	listingPrice?: number;
 	soldPrice?: number;
-	status: "available" | "sold";
+	status: "processing" | "available" | "sold";
 	dateAcquired: string;
 	dateSold?: string;
 
@@ -67,13 +67,9 @@ export const CLUB_DEXTERITIES = {
 	left: "Left Handed",
 	right: "Right Handed",
 };
-export const CLUB_ACQUISITIONS = {
-	cash: "Cash",
-	trade: "Trade",
-	cash_trade: "Cash + Trade",
-};
 export const CLUB_STATUSES = {
 	available: "Available",
+	processing: "Processing",
 	sold: "Sold",
 };
 export const CLUB_SHAFT_MATERIALS = {
@@ -93,11 +89,6 @@ export const CLUB_GRIP_SIZES = {
 	standard: "Standard",
 	midsize: "Midsize",
 	jumbo: "Jumbo",
-};
-export const CLUB_ACQUISITION = {
-	cash: "Cash",
-	trade: "Trade",
-	cash_trade: "Cash + Trade",
 };
 
 export const EMPTY_CLUB: Club = {
@@ -128,8 +119,8 @@ export const EMPTY_CLUB: Club = {
 	grind: undefined,
 	headcoverIncluded: false,
 
-	acquisition: "cash",
 	purchasePrice: 0,
+	listingPrice: undefined,
 	soldPrice: undefined,
 	status: "available",
 	dateAcquired: new Date().toISOString(),

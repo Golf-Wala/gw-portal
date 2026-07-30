@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getTrades, deleteTrade } from "./trade.api";
+import { getTrades, deleteTrade, createTrade } from "./trade.api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Trade } from "@/types";
 
 export function useGetTrades(
 	page: number,
@@ -11,6 +12,16 @@ export function useGetTrades(
 		queryKey: ["trades", page, limit],
 		queryFn: () => getTrades(page, limit, params),
 		placeholderData: (prev) => prev,
+	});
+}
+
+export function useCreateTrade() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (trade: Partial<Trade>) => createTrade(trade),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["trades"] });
+		},
 	});
 }
 

@@ -97,10 +97,14 @@ export default function TradesTable() {
 					{trades.map((trade) => (
 						<TableRow key={trade._id}>
 							<TableCell>{trade.customerName}</TableCell>
-							<TableCell>{trade.customerContact}</TableCell>
+							<TableCell>{trade.customerPhone}</TableCell>
 							<TableCell>{trade.clubsIn.length}</TableCell>
 							<TableCell>{trade.clubsOut.length}</TableCell>
-							<TableCell>{formatCurrency(trade.cash)}</TableCell>
+							<TableCell
+								className={`${trade.cash > 0 ? "text-green-600" : "text-red-600"}`}
+							>
+								{formatCurrency(trade.cash)}
+							</TableCell>
 							<TableCell className="text-right">
 								<DropdownMenu>
 									<DropdownMenuTrigger

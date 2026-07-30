@@ -15,7 +15,7 @@ export function useGetClubs(
 	params?: Record<string, unknown>
 ) {
 	return useQuery({
-		queryKey: ["clubs", page, limit],
+		queryKey: ["clubs", page, limit, params],
 		queryFn: () => getClubs(page, limit, params),
 		placeholderData: (prev) => prev,
 	});

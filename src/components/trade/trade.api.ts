@@ -21,6 +21,11 @@ export const getTrades = async (
 	return data;
 };
 
+export const createTrade = async (trade: Partial<Trade>) => {
+	const { data } = await api.post<Trade>("/trades", trade);
+	return data;
+};
+
 export const deleteTrade = async (tradeId: string) => {
 	const { data } = await api.delete(`/trades/${tradeId}`);
 	return data;

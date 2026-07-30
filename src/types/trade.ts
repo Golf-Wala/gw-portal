@@ -2,9 +2,8 @@ import type { Club } from "@/types";
 
 export interface Trade {
 	_id: string;
-	status: "pending" | "accepted" | "rejected";
 	customerName: string;
-	customerContact?: string;
+	customerPhone?: string;
 	clubsIn: string[] | Club[];
 	clubsOut: string[] | Club[];
 	cash: number; // negative = cash out, positive = cash in
@@ -15,9 +14,8 @@ export interface Trade {
 
 export const EMPTY_TRADE: Trade = {
 	_id: "",
-	status: "pending",
 	customerName: "",
-	customerContact: "",
+	customerPhone: "",
 	clubsIn: [],
 	clubsOut: [],
 	cash: 0,

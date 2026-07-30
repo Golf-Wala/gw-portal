@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { useLocation, Link } from "react-router-dom";
+import { SidebarTrigger } from "../ui/sidebar";
 
 const LABELS: Record<string, string> = {
 	properties: "Properties",
@@ -23,6 +24,7 @@ export default function AppBreadcrumb() {
 	return (
 		<Breadcrumb>
 			<BreadcrumbList>
+				<SidebarTrigger className="text-black" />
 				<BreadcrumbItem>
 					{isHome ? (
 						<BreadcrumbPage>Home</BreadcrumbPage>
@@ -30,7 +32,6 @@ export default function AppBreadcrumb() {
 						<BreadcrumbLink render={<Link to="/">Home</Link>} />
 					)}
 				</BreadcrumbItem>
-
 				{segments.map((segment, index) => {
 					const isLast = index === segments.length - 1;
 

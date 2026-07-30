@@ -2,7 +2,6 @@ import {
 	ChevronsUpDown,
 	LayoutDashboard,
 	LogOut,
-	ReceiptText,
 	ShelvingUnit,
 	ArrowLeftRight,
 } from "lucide-react";
@@ -36,11 +35,6 @@ const PAGES = [
 		name: "Inventory",
 		location: "/inventory",
 		icon: ShelvingUnit,
-	},
-	{
-		name: "Work Orders",
-		location: "/work-orders",
-		icon: ReceiptText,
 	},
 	{
 		name: "Trades",

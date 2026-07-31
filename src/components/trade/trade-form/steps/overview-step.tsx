@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useNavigate } from "react-router-dom";
+import { creditPrice } from "../../trade.utils";
 
 export default function OverviewStep() {
 	const navigate = useNavigate();
@@ -131,7 +132,11 @@ export default function OverviewStep() {
 						<TradeFormClubCard
 							key={(club as Club)._id}
 							club={club as Club}
-							view="customer"
+							price={
+								paymentMethod === "credit"
+									? creditPrice((club as Club).purchasePrice)
+									: (club as Club).purchasePrice
+							}
 						/>
 					))}
 				</div>
@@ -143,7 +148,10 @@ export default function OverviewStep() {
 						<TradeFormClubCard
 							key={(club as Club)._id}
 							club={club as Club}
-							view="business"
+							price={
+								(club as Club).listingPrice ??
+								(club as Club).purchasePrice
+							}
 						/>
 					))}
 				</div>

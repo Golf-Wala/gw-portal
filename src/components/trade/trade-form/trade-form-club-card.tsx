@@ -13,32 +13,20 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useTradeStore } from "../trade.store";
 
 interface Props {
 	club: Club;
 	onRemove?: () => void;
 	onSelect?: () => void;
-	view?: "customer" | "business";
+	price?: number;
 }
 
 export default function TradeFormClubCard({
 	club,
 	onRemove,
 	onSelect,
-	view = "business",
+	price,
 }: Props) {
-	const paymentMethod = useTradeStore((s) => s.paymentMethod);
-
-	const price =
-		view === "customer"
-			? paymentMethod === "cash"
-				? (club.listingPrice ?? club.purchasePrice)
-				: Math.floor(
-						((club.listingPrice ?? club.purchasePrice) * 1.1) / 5
-					) * 5
-			: (club.listingPrice ?? club.purchasePrice);
-
 	return (
 		<div
 			onClick={onSelect}
@@ -67,10 +55,12 @@ export default function TradeFormClubCard({
 			</div>
 
 			<div className="flex shrink-0 items-center gap-3">
-				<span className="font-semibold font-mono">
-					{formatCurrency(price)}
-				</span>
-				{onRemove && view !== "customer" && (
+				{price && (
+					<span className="font-semibold font-mono">
+						{formatCurrency(price)}
+					</span>
+				)}
+				{onRemove && (
 					<RemoveClubButton club={club} onRemove={onRemove} />
 				)}
 			</div>

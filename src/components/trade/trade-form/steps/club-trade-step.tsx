@@ -22,7 +22,10 @@ export default function ClubTradeStep() {
 							<TradeFormClubCard
 								key={(club as Club)._id}
 								club={club as Club}
-								view="business"
+								price={
+									(club as Club).listingPrice ??
+									(club as Club).purchasePrice
+								}
 							/>
 						))}
 					</div>

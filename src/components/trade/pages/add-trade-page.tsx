@@ -6,6 +6,7 @@ import ContactStep from "../trade-form/steps/contact-step";
 import ReviewStep from "../trade-form/steps/review-step";
 import ClubTradeStep from "../trade-form/steps/club-trade-step";
 import OverviewStep from "../trade-form/steps/overview-step";
+import { useEffect } from "react";
 
 const STEPS = {
 	contact: <ContactStep />,
@@ -21,6 +22,7 @@ export default function AddTradePage() {
 	const club = useTradeStore((s) => s.selectedClub);
 	const setClub = useTradeStore((s) => s.setSelectedClub);
 	const setTrade = useTradeStore((s) => s.setTrade);
+	const resetTrade = useTradeStore((s) => s.resetTrade);
 
 	function addEditClub() {
 		if (!club) return;
@@ -42,6 +44,10 @@ export default function AddTradePage() {
 
 		setClub(null);
 	}
+
+	useEffect(() => {
+		resetTrade();
+	}, []);
 
 	return (
 		<>

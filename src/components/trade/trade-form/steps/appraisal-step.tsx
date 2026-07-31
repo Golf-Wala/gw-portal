@@ -39,6 +39,7 @@ export default function AppraisalStep() {
 						club={club as Club}
 						onSelect={() => setSelectedClub(club as Club)}
 						onRemove={() => handleRemove(club as Club)}
+						price={(club as Club).purchasePrice}
 					/>
 				))}
 				{trade.clubsIn.length === 0 && (

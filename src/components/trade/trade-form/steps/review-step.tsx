@@ -7,6 +7,7 @@ import type { Club } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import TradeFormClubCard from "../trade-form-club-card";
 import { toast } from "@/components/ui/toast";
+import { creditPrice } from "../../trade.utils";
 
 export default function ReviewStep() {
 	const trade = useTradeStore((s) => s.trade);
@@ -78,7 +79,13 @@ export default function ReviewStep() {
 							<TradeFormClubCard
 								key={(club as Club)._id}
 								club={club as Club}
-								view="customer"
+								price={
+									paymentMethod === "cash"
+										? (club as Club).purchasePrice
+										: creditPrice(
+												(club as Club).purchasePrice
+											)
+								}
 							/>
 						))}
 					</div>

@@ -1,6 +1,5 @@
 import {
 	ChevronsUpDown,
-	LayoutDashboard,
 	LogOut,
 	ShelvingUnit,
 	ArrowLeftRight,
@@ -26,11 +25,6 @@ import {
 import { useAuthStore } from "../auth/auth-store";
 
 const PAGES = [
-	{
-		name: "Dashboard",
-		location: "/",
-		icon: LayoutDashboard,
-	},
 	{
 		name: "Inventory",
 		location: "/inventory",

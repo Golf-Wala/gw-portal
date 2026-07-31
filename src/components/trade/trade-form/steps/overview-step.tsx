@@ -36,7 +36,10 @@ export default function OverviewStep() {
 		try {
 			const createdClubsIn = await Promise.all(
 				(trade.clubsIn as Club[]).map((club) =>
-					createClub.mutateAsync(club)
+					createClub.mutateAsync({
+						...club,
+						status: "processing",
+					})
 				)
 			);
 

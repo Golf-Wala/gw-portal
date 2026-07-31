@@ -15,7 +15,9 @@ import {
 import {
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuGroup,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import {
@@ -35,7 +37,7 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "../ui/pagination";
-import { useGetClubs } from "./club.query";
+import { useGetClubs, useUpdateClub } from "./club.query";
 import { useDeleteClub } from "./club.query";
 import { CLUB_CATEGORIES } from "@/types/club";
 import { useClubStore } from "./club.store";
@@ -46,20 +48,19 @@ import {
 	InputGroupInput,
 } from "../ui/input-group";
 import { Spinner } from "../ui/spinner";
+import { toast } from "../ui/toast";
+import { formatCurrency } from "@/lib/utils";
 
 export default function ClubsTable() {
 	const setClub = useClubStore((s) => s.setClub);
 	const [page, setPage] = useState(1);
 	const [search, setSearch] = useState("");
 
-	const { data, isPending, isLoading, isPlaceholderData } = useGetClubs(
-		page,
-		10,
-		{
-			search,
-		}
-	);
 	const { mutate: deleteClub, isPending: isDeleting } = useDeleteClub();
+	const { mutate: updateClub, isPending: isUpdating } = useUpdateClub();
+	const { data, isPending, isPlaceholderData } = useGetClubs(page, 10, {
+		search,
+	});
 
 	const [clubToDelete, setClubToDelete] = useState<Club | null>(null);
 
@@ -78,6 +79,247 @@ export default function ClubsTable() {
 		});
 	};
 
+	function updateClubStatus(club: Club, status: Club["status"]) {
+		if (club.status === status) return;
+		if (isUpdating) return;
+		updateClub(
+			{
+				...club,
+				status,
+			},
+			{
+				onSuccess: () => {
+					toast.add({
+						title: "Club updated",
+						description: `The club ${club.clubBrand} ${club.clubModel} has been updated to status "${status}".`,
+					});
+				},
+			}
+		);
+	}
+
+	return (
+		<div className="space-y-4">
+			<div className="flex justify-end">
+				<InputGroup className="max-w-md">
+					<InputGroupInput
+						placeholder="Search clubs..."
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+					/>
+
+					<InputGroupAddon>
+						<Search />
+					</InputGroupAddon>
+
+					{isPending && (
+						<InputGroupAddon align="inline-end">
+							<Spinner />
+						</InputGroupAddon>
+					)}
+				</InputGroup>
+			</div>
+			<div className="rounded border">
+				<Table>
+					<TableHeader>
+						<TableRow className="bg-muted">
+							<TableHead>Category</TableHead>
+							<TableHead>Brand</TableHead>
+							<TableHead>Model</TableHead>
+							<TableHead>Status</TableHead>
+							<TableHead>Purchase Price</TableHead>
+							<TableHead>Listing Price</TableHead>
+							<TableHead className="text-right"></TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{clubs.map((club) => (
+							<TableRow key={club._id}>
+								<TableCell>
+									{CLUB_CATEGORIES[club.category] ?? ""}
+								</TableCell>
+								<TableCell>{club.clubBrand}</TableCell>
+								<TableCell>{club.clubModel}</TableCell>
+								<TableCell className="capitalize">
+									<Badge
+										variant={
+											club.status === "available"
+												? "default"
+												: club.status === "processing"
+													? "secondary"
+													: "destructive"
+										}
+									>
+										{club.status}
+									</Badge>
+								</TableCell>
+								<TableCell>
+									{formatCurrency(club.purchasePrice)}
+								</TableCell>
+								<TableCell>
+									{club?.listingPrice
+										? formatCurrency(club.listingPrice)
+										: "N/A"}
+								</TableCell>
+								<TableCell className="text-right">
+									<DropdownMenu>
+										<DropdownMenuTrigger
+											render={
+												<Button
+													variant="ghost"
+													size="icon"
+												>
+													<EllipsisVertical />
+												</Button>
+											}
+										/>
+										<DropdownMenuContent>
+											{club.status !== "sold" && (
+												<>
+													<DropdownMenuGroup>
+														{club.status ===
+															"available" && (
+															<DropdownMenuItem
+																onClick={() =>
+																	updateClubStatus(
+																		club,
+																		"sold"
+																	)
+																}
+															>
+																Mark as sold
+															</DropdownMenuItem>
+														)}
+													</DropdownMenuGroup>
+													<DropdownMenuGroup>
+														{club.status ===
+															"processing" && (
+															<DropdownMenuItem
+																onClick={() =>
+																	updateClubStatus(
+																		club,
+																		"available"
+																	)
+																}
+															>
+																Mark as
+																available
+															</DropdownMenuItem>
+														)}
+													</DropdownMenuGroup>
+													<DropdownMenuSeparator />
+												</>
+											)}
+											<DropdownMenuGroup>
+												<DropdownMenuItem
+													onClick={() =>
+														setClub(club)
+													}
+												>
+													<Edit />
+													Edit
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													variant="destructive"
+													onClick={(e) => {
+														e.preventDefault();
+														setClubToDelete(club);
+													}}
+												>
+													<Trash2 />
+													Delete
+												</DropdownMenuItem>
+											</DropdownMenuGroup>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</TableCell>
+							</TableRow>
+						))}
+						{clubs.length === 0 && (
+							<TableRow>
+								<TableCell colSpan={9} className="text-center">
+									No clubs found.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+
+				{totalPages > 1 && (
+					<TablePagination
+						page={page}
+						totalPages={totalPages}
+						setPage={setPage}
+						isPlaceholderData={isPlaceholderData}
+					/>
+				)}
+
+				<DeleteClubDialog
+					club={clubToDelete}
+					isOpen={!!clubToDelete}
+					onClose={() => setClubToDelete(null)}
+					onConfirm={handleConfirmDelete}
+					isDeleting={isDeleting}
+				/>
+			</div>
+		</div>
+	);
+}
+
+function DeleteClubDialog({
+	club,
+	isOpen,
+	onClose,
+	onConfirm,
+	isDeleting,
+}: {
+	club: Club | null;
+	isOpen: boolean;
+	onClose: () => void;
+	onConfirm: () => void;
+	isDeleting: boolean;
+}) {
+	if (!club) return null;
+
+	return (
+		<AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>
+						Delete {club.clubBrand} {club.clubModel}?
+					</AlertDialogTitle>
+					<AlertDialogDescription>
+						This action cannot be undone. This will permanently
+						delete this club and remove its data from the server.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel disabled={isDeleting}>
+						Cancel
+					</AlertDialogCancel>
+					<AlertDialogAction
+						onClick={onConfirm}
+						disabled={isDeleting}
+					>
+						{isDeleting ? "Deleting..." : "Delete"}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+	);
+}
+
+function TablePagination({
+	page,
+	totalPages,
+	setPage,
+	isPlaceholderData,
+}: {
+	page: number;
+	totalPages: number;
+	setPage: (page: number) => void;
+	isPlaceholderData: boolean;
+}) {
 	const goToPage = (p: number) => {
 		if (p < 1 || p > totalPages) return;
 		setPage(p);
@@ -98,197 +340,69 @@ export default function ClubsTable() {
 	};
 
 	return (
-		<div className="space-y-4">
-			<div className="flex justify-end">
-				<InputGroup className="max-w-md">
-					<InputGroupInput
-						placeholder="Search clubs..."
-						value={search}
-						onChange={(e) => setSearch(e.target.value)}
-					/>
+		<div className="flex justify-center border-t py-3">
+			<Pagination>
+				<PaginationContent>
+					<PaginationItem>
+						<PaginationPrevious
+							href="#"
+							onClick={(e) => {
+								e.preventDefault();
+								if (!isPlaceholderData) {
+									goToPage(page - 1);
+								}
+							}}
+							className={
+								page === 1
+									? "pointer-events-none opacity-50"
+									: undefined
+							}
+						/>
+					</PaginationItem>
 
-					<InputGroupAddon>
-						<Search />
-					</InputGroupAddon>
-
-					{isLoading && (
-						<InputGroupAddon align="inline-end">
-							<Spinner />
-						</InputGroupAddon>
-					)}
-				</InputGroup>
-			</div>
-			<div className="rounded border">
-				<Table>
-					<TableHeader>
-						<TableRow className="bg-muted">
-							<TableHead>Category</TableHead>
-							<TableHead>Brand</TableHead>
-							<TableHead>Model</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead className="text-right"></TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{clubs.map((club) => (
-							<TableRow key={club._id}>
-								<TableCell>
-									{CLUB_CATEGORIES[club.category] ?? ""}
-								</TableCell>
-								<TableCell>{club.clubBrand}</TableCell>
-								<TableCell>{club.clubModel}</TableCell>
-								<TableCell className="capitalize">
-									<Badge
-										variant={
-											club.status === "available"
-												? "default"
-												: "secondary"
-										}
-									>
-										{club.status}
-									</Badge>
-								</TableCell>
-								<TableCell className="text-right">
-									<DropdownMenu>
-										<DropdownMenuTrigger
-											render={
-												<Button
-													variant="ghost"
-													size="icon"
-												>
-													<EllipsisVertical />
-												</Button>
-											}
-										/>
-										<DropdownMenuContent>
-											<DropdownMenuItem
-												onClick={() => setClub(club)}
-											>
-												<Edit />
-												Edit
-											</DropdownMenuItem>
-											<DropdownMenuItem
-												variant="destructive"
-												onClick={(e) => {
-													e.preventDefault();
-													setClubToDelete(club);
-												}}
-											>
-												<Trash2 />
-												Delete
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</TableCell>
-							</TableRow>
-						))}
-						{clubs.length === 0 && (
-							<TableRow>
-								<TableCell colSpan={7} className="text-center">
-									No clubs found.
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-
-				{totalPages > 1 && (
-					<div className="flex justify-center border-t py-3">
-						<Pagination>
-							<PaginationContent>
+					{getPageNumbers().map((p, i, arr) => (
+						<div key={p} className="flex items-center">
+							{i > 0 && p - arr[i - 1] > 1 && (
 								<PaginationItem>
-									<PaginationPrevious
-										href="#"
-										onClick={(e) => {
-											e.preventDefault();
-											if (!isPlaceholderData) {
-												goToPage(page - 1);
-											}
-										}}
-										className={
-											page === 1
-												? "pointer-events-none opacity-50"
-												: undefined
-										}
-									/>
+									<PaginationEllipsis />
 								</PaginationItem>
+							)}
 
-								{getPageNumbers().map((p, i, arr) => (
-									<div key={p} className="flex items-center">
-										{i > 0 && p - arr[i - 1] > 1 && (
-											<PaginationItem>
-												<PaginationEllipsis />
-											</PaginationItem>
-										)}
-
-										<PaginationItem>
-											<PaginationLink
-												href="#"
-												isActive={p === page}
-												onClick={(e) => {
-													e.preventDefault();
-													if (!isPlaceholderData) {
-														goToPage(p);
-													}
-												}}
-											>
-												{p}
-											</PaginationLink>
-										</PaginationItem>
-									</div>
-								))}
-
-								<PaginationItem>
-									<PaginationNext
-										href="#"
-										onClick={(e) => {
-											e.preventDefault();
-											if (!isPlaceholderData) {
-												goToPage(page + 1);
-											}
-										}}
-										className={
-											page === totalPages
-												? "pointer-events-none opacity-50"
-												: undefined
+							<PaginationItem>
+								<PaginationLink
+									href="#"
+									isActive={p === page}
+									onClick={(e) => {
+										e.preventDefault();
+										if (!isPlaceholderData) {
+											goToPage(p);
 										}
-									/>
-								</PaginationItem>
-							</PaginationContent>
-						</Pagination>
-					</div>
-				)}
+									}}
+								>
+									{p}
+								</PaginationLink>
+							</PaginationItem>
+						</div>
+					))}
 
-				<AlertDialog
-					open={!!clubToDelete}
-					onOpenChange={(open) => !open && setClubToDelete(null)}
-				>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle>
-								Delete {clubToDelete?.clubBrand}{" "}
-								{clubToDelete?.clubModel}?
-							</AlertDialogTitle>
-							<AlertDialogDescription>
-								This action cannot be undone. This will
-								permanently delete this club and remove its data
-								from the server.
-							</AlertDialogDescription>
-						</AlertDialogHeader>
-						<AlertDialogFooter>
-							<AlertDialogCancel disabled={isDeleting}>
-								Cancel
-							</AlertDialogCancel>
-							<AlertDialogAction
-								onClick={handleConfirmDelete}
-								disabled={isDeleting}
-							>
-								{isDeleting ? "Deleting..." : "Delete"}
-							</AlertDialogAction>
-						</AlertDialogFooter>
-					</AlertDialogContent>
-				</AlertDialog>
-			</div>
+					<PaginationItem>
+						<PaginationNext
+							href="#"
+							onClick={(e) => {
+								e.preventDefault();
+								if (!isPlaceholderData) {
+									goToPage(page + 1);
+								}
+							}}
+							className={
+								page === totalPages
+									? "pointer-events-none opacity-50"
+									: undefined
+							}
+						/>
+					</PaginationItem>
+				</PaginationContent>
+			</Pagination>
 		</div>
 	);
 }

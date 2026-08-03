@@ -97,7 +97,7 @@ export const EMPTY_CLUB: Club = {
 	category: "driver",
 	clubBrand: "",
 	clubModel: "",
-	condition: "new",
+	condition: "used",
 	dexterity: "right",
 
 	shaftBrand: undefined,

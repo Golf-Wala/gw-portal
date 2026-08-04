@@ -61,6 +61,7 @@ export default function ClubDialog({
 
 	function handleSubmit(e: any) {
 		e.preventDefault();
+		e.stopPropagation();
 		onSubmit?.();
 	}
 
